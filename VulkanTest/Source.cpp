@@ -44,6 +44,7 @@ private:
     void initVulkan() {
         createInstance();
         enumerateExtensions();
+        enumerateDevices();
     }
 
     void mainLoop() {
@@ -159,6 +160,21 @@ private:
 
         for (const auto& extension : extensions) {
             std::cout << '\t' << extension.extensionName << '\n';
+        }
+    }
+
+    void enumerateDevices() {
+        uint32_t deviceCount = 0;
+        vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
+        std::vector<VkPhysicalDevice> devices(deviceCount);
+        vkEnumeratePhysicalDevices(m_instance, &deviceCount, devices.data());
+
+        std::cout << "Available Devices:\n";
+
+        for (const auto& device : devices) {
+            VkPhysicalDeviceProperties deviceProperties;
+            vkGetPhysicalDeviceProperties(device, &deviceProperties);
+            std::cout << '\t' << deviceProperties.deviceName << '\n';
         }
     }
 };
