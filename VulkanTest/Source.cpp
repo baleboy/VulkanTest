@@ -36,6 +36,7 @@ private:
     VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
     VkDevice m_device;
     VkQueue m_graphicsQueue;
+    VkSurfaceKHR m_surface;
 
     void initWindow() {
         glfwInit();
@@ -46,6 +47,7 @@ private:
 
     void initVulkan() {
         createInstance();
+        createSurface();
         enumerateExtensions();
         enumerateDevices();
         pickPhysicalDevice();
@@ -60,6 +62,7 @@ private:
 
     void cleanup() {
         vkDestroyDevice(m_device, nullptr);
+        vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
         vkDestroyInstance(m_instance, nullptr);
         glfwDestroyWindow(m_window);
         glfwTerminate();
@@ -234,6 +237,12 @@ private:
         }
 
         vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
+    }
+
+    void createSurface() {
+        if (glfwCreateWindowSurface(m_instance, m_window, nullptr, &m_surface) != VK_SUCCESS) {
+            throw std::runtime_error("Unable to create surface");
+        }
     }
 
     void enumerateExtensions() {
