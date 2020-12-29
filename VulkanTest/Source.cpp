@@ -34,6 +34,8 @@ private:
     GLFWwindow* m_window;
     VkInstance m_instance;
     VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
+    VkDevice m_device;
+    VkQueue m_graphicsQueue;
 
     void initWindow() {
         glfwInit();
@@ -47,6 +49,7 @@ private:
         enumerateExtensions();
         enumerateDevices();
         pickPhysicalDevice();
+        createLogicalDevice();
     }
 
     void mainLoop() {
@@ -56,6 +59,7 @@ private:
     }
 
     void cleanup() {
+        vkDestroyDevice(m_device, nullptr);
         vkDestroyInstance(m_instance, nullptr);
         glfwDestroyWindow(m_window);
         glfwTerminate();
@@ -205,6 +209,31 @@ private:
         }
 
         return indices;
+    }
+
+    void createLogicalDevice() {
+        QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice);
+
+        VkDeviceQueueCreateInfo queueCreateInfo{};
+        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+        queueCreateInfo.queueCount = 1;
+        float queuePriority = 1.0;
+        queueCreateInfo.pQueuePriorities = &queuePriority;
+
+        VkPhysicalDeviceFeatures deviceFeatures{};
+
+        VkDeviceCreateInfo deviceCreateInfo{};
+        deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
+        deviceCreateInfo.queueCreateInfoCount = 1;
+        deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+
+        if (vkCreateDevice(m_physicalDevice, &deviceCreateInfo, nullptr, &m_device) != VK_SUCCESS) {
+            throw std::runtime_error("Unable to create logical device");
+        }
+
+        vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
     }
 
     void enumerateExtensions() {
