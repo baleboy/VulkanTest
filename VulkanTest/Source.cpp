@@ -33,7 +33,7 @@ private:
 
     GLFWwindow* m_window;
     VkInstance m_instance;
-    VkPhysicalDevice m_device = VK_NULL_HANDLE;
+    VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
 
     void initWindow() {
         glfwInit();
@@ -165,11 +165,11 @@ private:
 
         for (const auto& device: devices) {
             if (isDeviceSuitable(device)) {
-                m_device = device;
+                m_physicalDevice = device;
                 break;
             }
         }
-        if (m_device == VK_NULL_HANDLE) {
+        if (m_physicalDevice == VK_NULL_HANDLE) {
             throw std::runtime_error("No suitable GPU found");
         }
     }
