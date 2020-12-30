@@ -47,6 +47,8 @@ private:
     VkSurfaceKHR m_surface;
     VkSwapchainKHR m_swapchain;
     std::vector<VkImage> m_swapchainImages;
+    VkFormat m_swapChainImageFormat;
+    VkExtent2D m_swapChainExtent;
 
     void initWindow() {
         glfwInit();
@@ -419,6 +421,8 @@ private:
         vkGetSwapchainImagesKHR(m_device, m_swapchain, &swapchainImageCount, nullptr);
         m_swapchainImages.resize(swapchainImageCount);
         vkGetSwapchainImagesKHR(m_device, m_swapchain, &swapchainImageCount, m_swapchainImages.data());
+        m_swapChainImageFormat = surfaceFormat.format;
+        m_swapChainExtent = extent;
     }
 
     void enumerateExtensions() {
