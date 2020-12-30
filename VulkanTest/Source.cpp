@@ -283,7 +283,7 @@ private:
         return details;
     }
 
-    VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> formats) {
+    VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& formats) {
         for (const auto& format : formats) {
             if (format.format == VK_FORMAT_B8G8R8A8_SRGB &&
                 format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
@@ -293,10 +293,21 @@ private:
         return formats[0];
     }
 
+    VkPresentModeKHR choosePresentMode(const std::vector<VkPresentModeKHR>& presentModes) {
+        for (const auto& presentMode : presentModes) {
+            if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+                return presentMode;
+            }
+        }
+        return VK_PRESENT_MODE_FIFO_KHR;
+    }
+
     void createLogicalDevice() {
         QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice);
 
-        std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+        std::set<uint32_t> uniqueQueueFamilies = { 
+            indices.graphicsFamily.value(), 
+            indices.presentFamily.value() };
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 
         float queuePriority = 1.0;
