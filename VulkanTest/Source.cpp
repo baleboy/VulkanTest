@@ -191,8 +191,13 @@ private:
 
         QueueFamilyIndices indices = findQueueFamilies(device);
         bool extensionsSupported = checkDeviceExtensionSupport(device);
+        bool swapChainAdequate = false;
+        if (extensionsSupported) {
+            SwapChainSupportDetails swapChainSupport = querySwapchainSupport(device);
+            swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+        }
         
-        return indices.isComplete() && extensionsSupported;
+        return indices.isComplete() && extensionsSupported && swapChainAdequate;
     }
 
     bool checkDeviceExtensionSupport(VkPhysicalDevice device) {
@@ -250,6 +255,32 @@ private:
         }
 
         return indices;
+    }
+
+    struct SwapChainSupportDetails {
+        VkSurfaceCapabilitiesKHR capabilities;
+        std::vector<VkSurfaceFormatKHR> formats;
+        std::vector<VkPresentModeKHR> presentModes;
+    };
+
+    SwapChainSupportDetails querySwapchainSupport(VkPhysicalDevice device) {
+        SwapChainSupportDetails details;
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_surface, &details.capabilities);
+
+        uint32_t count;
+
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_surface, &count, nullptr);
+        if (count != 0) {
+            details.formats.resize(count);
+            vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_surface, &count, details.formats.data());
+        }
+
+        vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_surface, &count, nullptr);
+        if (count != 0) {
+            details.presentModes.resize(count);
+            vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_surface, &count, details.presentModes.data());
+        }
+        return details;
     }
 
     void createLogicalDevice() {
